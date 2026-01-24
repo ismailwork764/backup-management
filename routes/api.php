@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\ClientController;
 use App\Http\Controllers\Admin\StorageServerController;
 use App\Http\Controllers\Admin\DashboardController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\ReportController;
 
 Route::post('/register', [AgentRegistrationController::class, 'register']);
 Route::get('/admin/clients-overview', [AdminReportingController::class, 'clientsOverview']);
@@ -27,7 +28,9 @@ Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function ()
 Route::prefix('admin')->group(function () {
 
     Route::get('/agents', [AgentController::class, 'index']);
-    Route::get('/clients', [ClientController::class, 'index']);
     Route::get('/storage-servers', [StorageServerController::class, 'index']);
+    Route::get('/agents/{agent}/backups', [AgentController::class, 'backups']);
+    Route::get('/reports/monthly-usage', [ReportController::class, 'monthlyUsage']);
 
 });
+

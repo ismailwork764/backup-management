@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Crypt;
 class StorageServer extends Model
 {
     protected $fillable = [
+        'hetzner_id',
         'name',
         'region',
         'api_token',

@@ -20,6 +20,7 @@ class Agent extends Model
 
     protected $casts = [
         'last_seen_at' => 'datetime',
+        'last_backup_at' => 'datetime',
         'is_active' => 'boolean',
     ];
 

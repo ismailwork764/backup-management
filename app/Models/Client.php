@@ -14,6 +14,9 @@ class Client extends Model
         'hetzner_subaccount_id',
         'registration_key',
         'is_active',
+        'quota_gb',
+        'hetzner_username',
+        'hetzner_password'
     ];
 
     protected $casts = [

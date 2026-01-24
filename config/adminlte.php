@@ -313,22 +313,22 @@ return [
     ],
     [
         'text' => 'Clients',
-        'url'  => 'clients',
+        'url'  => 'admin/clients',
         'icon' => 'fas fa-fw fa-users',
     ],
     [
         'text' => 'Agents',
-        'url'  => 'agents',
+        'url'  => 'admin/agents',
         'icon' => 'fas fa-fw fa-server',
     ],
     [
         'text' => 'Storage Servers',
-        'url'  => 'storage-servers',
+        'url'  => 'admin/storage-servers',
         'icon' => 'fas fa-fw fa-hdd',
     ],
     [
         'text' => 'Reports',
-        'url'  => 'reports',
+        'url'  => 'admin/reports',
         'icon' => 'fas fa-fw fa-chart-bar',
     ],
     ],

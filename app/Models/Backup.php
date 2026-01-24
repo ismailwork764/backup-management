@@ -18,8 +18,8 @@ class Backup extends Model
     ];
 
     protected $casts = [
-        'size_gb' => 'decimal:2',
         'created_at' => 'datetime',
+        'size_gb' => 'decimal:2',
     ];
 
     public function agent(): BelongsTo

@@ -13,7 +13,6 @@ return new class extends Migration {
                   ->constrained('clients')
                   ->cascadeOnDelete();
             $table->string('hostname', 255);
-            $table->string('api_token_prefix', 8)->index();
             $table->char('api_token', 64)->unique();
             $table->timestamp('last_seen_at')->nullable();
             $table->timestamp('last_backup_at')->nullable();
