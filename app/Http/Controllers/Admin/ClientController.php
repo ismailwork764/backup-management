@@ -85,12 +85,17 @@ class ClientController extends Controller
             $hetznerService = app(\App\Services\HetznerStorageService::class);
             $password = $request->password ?? $this->generateStrongPassword(16);
 
-            // Minimum resources: smallest quota and default home folder
+            // Prepare access settings from form
             $subAccount = $hetznerService->createSubAccount([
                 'storage_box_id' => $storageServer->hetzner_id, // Hetzner ID
                 'name' => $request->name,                       // optional subaccount name
                 'password' => $password,
-                'home_directory' => '/',                        // default home dir
+                'home_directory' => 'client-' . preg_replace('/\s+/', '_', $request->name),                        // default home dir
+                'reachable_externally' => $request->has('reachable_externally') ? true : false,
+                'samba_enabled' => $request->has('samba_enabled') ? true : false,
+                'ssh_enabled' => $request->has('ssh_enabled') ? true : false,
+                'webdav_enabled' => $request->has('webdav_enabled') ? true : false,
+                'readonly' => $request->has('readonly') ? true : false,
             ]);
 
             // Validate response structure
@@ -112,6 +117,11 @@ class ClientController extends Controller
                 'quota_gb' => $request->quota_gb,
                 'hetzner_username' => $hetznerUsername,
                 'hetzner_password' => $hetznerPassword,
+                'ftp_enabled' => $request->has('ftp_enabled'),
+                'sftp_enabled' => $request->has('sftp_enabled'),
+                'scp_enabled' => $request->has('scp_enabled'),
+                'webdav_enabled' => $request->has('webdav_enabled'),
+                'samba_enabled' => $request->has('samba_enabled'),
             ]);
 
             DB::commit();
@@ -182,6 +192,14 @@ class ClientController extends Controller
 
         return back()->with('success', 'Agent deleted successfully');
     }
+
+    public function agentsIndex(Client $client)
+    {
+        $agents = $client->agents()->orderBy('last_seen_at', 'desc')->get();
+
+        return view('admin.clients.agents', compact('client', 'agents'));
+    }
+
     public function generateStrongPassword(int $length = 16): string
     {
         // Hetzner allowed characters: a-z A-Z Ä Ö Ü ä ö ü ß 0-9 ^ ° ! § $ % / ( ) = ? + # - . , ; : ~ * @ { } _ &

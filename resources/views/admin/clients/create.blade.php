@@ -47,6 +47,47 @@
                     <input type="number" name="quota_gb" class="form-control" min="10" required>
                 </div>
 
+                <!-- Access Settings Section -->
+                <div class="form-group">
+                    <label><strong>Access Protocols</strong></label>
+                    <p style="font-size: 0.9em; color: #666; margin-bottom: 1rem;">Select which protocols should be enabled for this client's subaccount</p>
+
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" name="reachable_externally" class="custom-control-input" id="reachable_externally" checked>
+                        <label class="custom-control-label" for="reachable_externally">
+                            <strong>External Reachability</strong>
+                        </label>
+                    </div>
+
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" name="ssh_enabled" class="custom-control-input" id="ssh_enabled" checked>
+                        <label class="custom-control-label" for="ssh_enabled">
+                            <strong>Allow SSH</strong>
+                        </label>
+                    </div>
+
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" name="samba_enabled" class="custom-control-input" id="samba_enabled">
+                        <label class="custom-control-label" for="samba_enabled">
+                            <strong>Allow SMB</strong>
+                        </label>
+                    </div>
+
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" name="webdav_enabled" class="custom-control-input" id="webdav_enabled">
+                        <label class="custom-control-label" for="webdav_enabled">
+                            <strong>WebDAV Enabled</strong>
+                        </label>
+                    </div>
+
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" name="readonly" class="custom-control-input" id="readonly">
+                        <label class="custom-control-label" for="readonly">
+                            <strong>Read Only</strong>
+                        </label>
+                    </div>
+                </div>
+
             </div>
 
             <div class="card-footer">

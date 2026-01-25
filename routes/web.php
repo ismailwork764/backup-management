@@ -29,6 +29,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::get('clients/create', [ClientController::class, 'create'])->name('admin.clients.create');
     Route::post('clients', [ClientController::class, 'store'])->name('admin.clients.store');
     Route::get('clients/{client}', [ClientController::class, 'show'])->name('admin.clients.show');
+    Route::get('clients/{client}/agents', [ClientController::class, 'agentsIndex'])->name('admin.clients.agents.index');
     Route::delete('clients/{client}/agents/{agent}', [ClientController::class, 'destroyAgent'])->name('admin.clients.agents.destroy');
 
     Route::get('api/clients', [ClientController::class, 'apiIndex']);
@@ -37,8 +38,11 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::get('agents/{agent}/backups', [AgentController::class, 'backups'])->name('admin.agents.backups');
     Route::get('api/agents/{agent}/backups', [AgentController::class, 'apiBackups']);
     Route::get('storage-servers', [StorageServerController::class, 'index'])->name('admin.storage_servers.index');
+    Route::get('storage-servers/create', [StorageServerController::class, 'create'])->name('admin.storage_servers.create');
+    Route::post('storage-servers', [StorageServerController::class, 'store'])->name('admin.storage_servers.store');
     Route::post('storage-servers/sync', [StorageServerController::class, 'sync'])->name('admin.storage_servers.sync');
     Route::get('storage-servers/{storageServer}', [StorageServerController::class, 'show'])->name('admin.storage_servers.show');
+    Route::delete('storage-servers/{storageServer}', [StorageServerController::class, 'destroy'])->name('admin.storage_servers.destroy');
     Route::delete('storage-servers/{storageServer}/subaccounts/{client}', [StorageServerController::class, 'destroySubaccount'])->name('admin.storage_servers.subaccounts.destroy');
     Route::get('api/storage-servers', [StorageServerController::class, 'apiIndex']);
     Route::get('reports', [ReportController::class, 'index'])->name('admin.reports');

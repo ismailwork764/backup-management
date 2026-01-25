@@ -10,6 +10,7 @@ return new class extends Migration {
         Schema::create('storage_servers', function (Blueprint $table) {
             $table->id();
             $table->string('name', 100);
+            $table->string('server_address')->nullable();
             $table->string('region', 50);
             $table->text('api_token');
             $table->unsignedInteger('total_capacity_gb')->nullable();

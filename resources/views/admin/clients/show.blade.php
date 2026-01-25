@@ -46,6 +46,31 @@
                     <th>Quota (GB)</th>
                     <td>{{ $client->quota_gb }}</td>
                 </tr>
+                <tr>
+                    <th>Access Protocols</th>
+                    <td>
+                        @php
+                            $protocols = [
+                                'Reachable Externally' => $client->reachable_externally,
+                                'SSH' => $client->ssh_enabled,
+                                'Samba/SMB' => $client->samba_enabled,
+                                'WebDAV' => $client->webdav_enabled,
+                                'Read-Only' => $client->readonly,
+                            ];
+                        @endphp
+                        @foreach($protocols as $name => $enabled)
+                            @if($enabled)
+                                <span class="badge badge-success">
+                                    <i class="fas fa-check"></i> {{ $name }}
+                                </span>
+                            @else
+                                <span class="badge badge-secondary">
+                                    <i class="fas fa-times"></i> {{ $name }}
+                                </span>
+                            @endif
+                        @endforeach
+                    </td>
+                </tr>
                 @if($diskUtilization)
                 <tr>
                     <th>Disk Utilization</th>
@@ -90,7 +115,12 @@
 
     <div class="card mt-3">
         <div class="card-header">
-            <h5 class="mb-0">Registered Backup Agents</h5>
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Registered Backup Agents</h5>
+                <a href="{{ route('admin.clients.agents.index', $client->id) }}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-list"></i> View All Agents
+                </a>
+            </div>
         </div>
         <div class="card-body">
             @if($client->agents->count() > 0)

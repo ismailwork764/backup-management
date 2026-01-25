@@ -20,10 +20,12 @@ Route::middleware('agent.auth')->group(function () {
     Route::post('/backup-status', [BackupStatusController::class, 'store']);
 });
 Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
+        // Sanctum-based API routes
+    });
+
 
         Route::get('/dashboard/summary', [DashboardController::class, 'summary']);
 
-    });
 
 Route::prefix('admin')->group(function () {
 

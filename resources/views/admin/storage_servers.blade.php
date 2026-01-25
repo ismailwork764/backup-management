@@ -5,12 +5,17 @@
 @section('content_header')
 <div class="d-flex justify-content-between align-items-center">
     <h1>Storage Servers</h1>
-    <form action="{{ route('admin.storage_servers.sync') }}" method="POST" class="d-inline">
-        @csrf
-        <button type="submit" class="btn btn-primary">
-            <i class="fas fa-sync"></i> Sync from Hetzner
-        </button>
-    </form>
+    <div>
+        <a href="{{ route('admin.storage_servers.create') }}" class="btn btn-success">
+            <i class="fas fa-plus"></i> Create Storage Box
+        </a>
+        <form action="{{ route('admin.storage_servers.sync') }}" method="POST" class="d-inline">
+            @csrf
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-sync"></i> Sync from Hetzner
+            </button>
+        </form>
+    </div>
 </div>
 @stop
 
@@ -48,6 +53,7 @@
                 <tr>
                     <th>ID</th>
                     <th>Name</th>
+                    <th>Address</th>
                     <th>Region</th>
                     <th>Usage</th>
                     <th>Clients</th>
@@ -74,6 +80,7 @@ $(function () {
         columns: [
             { data: 'id' },
             { data: 'name' },
+            { data: 'server_address' },
             { data: 'region' },
             { data: 'usage', orderable: false, searchable: false },
             { data: 'clients_count' },

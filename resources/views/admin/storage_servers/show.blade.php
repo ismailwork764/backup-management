@@ -39,6 +39,9 @@
                     <td>{{ $storageServer->name }}</td>
                 </tr>
                 <tr>
+                    <th>Address</th>
+                    <td>{{ $storageServer->server_address ? $storageServer->server_address : 'N/A' }}</td>
+                <tr>
                     <th>Region</th>
                     <td>{{ $storageServer->region }}</td>
                 </tr>
@@ -61,8 +64,8 @@
                     <td>
                         @php
                             $percent = $storageServer->total_capacity_gb
-                                ? round(($storageServer->used_capacity_gb / $storageServer->total_capacity_gb) * 100)
-                                : 0;
+                                        ? round(($storageServer->used_capacity_gb / $storageServer->total_capacity_gb) * 100, 2)
+                                        : 0;
                             $colorClass = $percent > 80 ? 'bg-danger' : ($percent > 60 ? 'bg-warning' : 'bg-success');
                         @endphp
                         <div class="progress" style="height: 25px;">

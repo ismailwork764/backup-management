@@ -50,7 +50,6 @@ class AgentRegistrationController extends Controller
         }
 
         $plainToken = Str::random(40);
-
         $agent = Agent::create([
             'client_id' => $client->id,
             'hostname' => $request->hostname,
@@ -58,6 +57,7 @@ class AgentRegistrationController extends Controller
             'last_seen_at' => now(),
             'is_active' => true,
         ]);
+
 
         // Get storage box details for connection info
         $storageServer = $client->storageServer;

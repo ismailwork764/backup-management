@@ -16,7 +16,12 @@ class Client extends Model
         'is_active',
         'quota_gb',
         'hetzner_username',
-        'hetzner_password'
+        'hetzner_password',
+        'reachable_externally',
+        'ssh_enabled',
+        'readonly',
+        'webdav_enabled',
+        'samba_enabled'
     ];
 
     protected $casts = [
