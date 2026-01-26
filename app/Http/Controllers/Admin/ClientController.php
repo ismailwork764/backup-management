@@ -86,11 +86,12 @@ class ClientController extends Controller
             $password = $request->password ?? $this->generateStrongPassword(16);
 
             // Prepare access settings from form
+            $home_directory = 'client-' . preg_replace('/\s+/', '_', $request->name);
             $subAccount = $hetznerService->createSubAccount([
                 'storage_box_id' => $storageServer->hetzner_id, // Hetzner ID
                 'name' => $request->name,                       // optional subaccount name
                 'password' => $password,
-                'home_directory' => 'client-' . preg_replace('/\s+/', '_', $request->name),                        // default home dir
+                'home_directory' => $home_directory,                        // default home dir
                 'reachable_externally' => $request->has('reachable_externally') ? true : false,
                 'samba_enabled' => $request->has('samba_enabled') ? true : false,
                 'ssh_enabled' => $request->has('ssh_enabled') ? true : false,
@@ -117,6 +118,7 @@ class ClientController extends Controller
                 'quota_gb' => $request->quota_gb,
                 'hetzner_username' => $hetznerUsername,
                 'hetzner_password' => $hetznerPassword,
+                'home_directory' => $home_directory ?? null,
                 'ftp_enabled' => $request->has('ftp_enabled'),
                 'sftp_enabled' => $request->has('sftp_enabled'),
                 'scp_enabled' => $request->has('scp_enabled'),

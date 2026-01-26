@@ -17,6 +17,7 @@ class Client extends Model
         'quota_gb',
         'hetzner_username',
         'hetzner_password',
+        'home_directory',
         'reachable_externally',
         'ssh_enabled',
         'readonly',
