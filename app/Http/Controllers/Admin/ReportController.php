@@ -50,23 +50,26 @@ class ReportController extends Controller
         $clients = Client::with('storageServer')->where('is_active', true)->get();
         
         $utilization = [];
-        $hetznerService = app(HetznerStorageService::class);
+        //$hetznerService = app(HetznerStorageService::class);
         
         foreach ($clients as $client) {
+         
             $usedGb = 0;
             $quotaGb = $client->quota_gb;
             $percentage = 0;
             
             try {
-                $subAccount = $hetznerService->getSubAccount(
+                /*$subAccount = $hetznerService->getSubAccount(
                     $client->storageServer->hetzner_id,
                     $client->hetzner_subaccount_id
-                );
+                );*/
                 
-                if (isset($subAccount['disk_quota']) && isset($subAccount['disk_usage'])) {
-                    $usedGb = round($subAccount['disk_usage'] / 1024 / 1024 / 1024, 2);
-                    $quotaGb = round($subAccount['disk_quota'] / 1024 / 1024 / 1024, 2);
-                    $percentage = $quotaGb > 0 ? round(($usedGb / $quotaGb) * 100, 2) : 0;
+                if (isset($client['quota_gb']) && isset($client['disk_usage_bytes'])) {
+                    $usedGb = round($client['disk_usage_bytes'] / 1024 / 1024 / 1024, 2);
+                    $quotaGb = (float) $client->quota_gb;
+                    $percentage = $quotaGb > 0
+                        ? round(($usedGb / $quotaGb) * 100)
+                        : 0;
                 }
             } catch (\Exception $e) {
                 // If we can't fetch, use quota from database
@@ -82,19 +85,19 @@ class ReportController extends Controller
                 'percentage' => $percentage,
                 'available_gb' => max(0, $quotaGb - $usedGb),
             ];
+            
         }
         
         return DataTables::of(collect($utilization))
             ->addColumn('usage_bar', function($row) {
                 $colorClass = $row['percentage'] > 80 ? 'bg-danger' : ($row['percentage'] > 60 ? 'bg-warning' : 'bg-success');
                 return '<div class="progress" style="height: 20px;">
-                    <div class="progress-bar ' . $colorClass . '" 
-                         role="progressbar" 
-                         style="width: ' . $row['percentage'] . '%"
-                         aria-valuenow="' . $row['percentage'] . '" 
-                         aria-valuemin="0" 
-                         aria-valuemax="100">
-                        ' . $row['percentage'] . '%
+                    <div class="progress-bar ' . $colorClass . '"
+                        style="width:' . $row['percentage'] . '%"
+                        aria-valuenow="' . $row['percentage'] . '"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                        title="' . $row['percentage'] . '%">
                     </div>
                 </div>';
             })
