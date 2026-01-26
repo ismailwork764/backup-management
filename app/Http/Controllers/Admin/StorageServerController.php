@@ -78,6 +78,8 @@ class StorageServerController extends Controller
             StorageServer::create([
                 'hetzner_id' => $storageBox['id'],
                 'name' => $storageBox['name'],
+                'username' => $storageBox['username'] ?? '',
+                'password' => $request->password,
                 'server_address' => $storageBox['server'] ?? null,
                 'region' => $storageBox['location']['name'] ?? $request->location,
                 'api_token' => $storageBox['username'] ?? '',

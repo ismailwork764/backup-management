@@ -11,6 +11,8 @@ class StorageServer extends Model
     protected $fillable = [
         'hetzner_id',
         'name',
+        'username',
+        'password',
         'server_address',
         'region',
         'api_token',

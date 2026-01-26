@@ -43,6 +43,10 @@
                     <td>{{ $client->storageServer->name }} ({{ $client->storageServer->region }})</td>
                 </tr>
                 <tr>
+                    <th>Server Address</th>
+                    <td>{{ $client->storageServer->server_address }}</td>
+                </tr>
+                <tr>
                     <th>Quota (GB)</th>
                     <td>{{ $client->quota_gb }}</td>
                 </tr>
@@ -86,6 +90,11 @@
                             </div>
                         </div>
                     </td>
+                </tr>
+                @else
+                <tr>
+                    <th>Disk Utilization</th>
+                    <td><span class="text-muted">Not available</span></td>
                 </tr>
                 @endif
                 <tr>

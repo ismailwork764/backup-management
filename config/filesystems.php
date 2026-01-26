@@ -30,6 +30,15 @@ return [
 
     'disks' => [
 
+        'hetzner_box' => [
+            'driver' => 'sftp',
+            'host' => env('HETZNER_HOST'),
+            'username' => env('HETZNER_USERNAME'),
+            'password' => env('HETZNER_PASSWORD'),
+            'port' => 22,
+            'root' => '/', // The root contains all sub-account folders
+        ],
+
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),

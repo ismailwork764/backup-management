@@ -82,6 +82,7 @@ class HetznerStorageService
                 StorageServer::create([
                     'hetzner_id' => $storageBoxId,
                     'name' => $box['name'] ?? $boxDetails['name'] ?? 'Storage Box ' . $storageBoxId,
+                    'username' => $box['username'] ?? $boxDetails['username'] ?? 'user_' . Str::random(5),
                     'server_address' => $box['server'] ?? $boxDetails['server'] ?? null,
                     'region' => $box['location']['name'] ?? $boxDetails['location']['name'] ?? null,
                     'api_token' => $box['username'] ?? $boxDetails['username'] ?? '',
@@ -92,6 +93,7 @@ class HetznerStorageService
             } else {
                 $storage_server->update([
                     'name' => $box['name'] ?? $boxDetails['name'] ?? $storage_server->name,
+                    'username' => $box['username'] ?? $boxDetails['username'] ?? $storage_server->username,
                     'server_address' => $box['server'] ?? $boxDetails['server'] ?? $storage_server->server_address,
                     'region' => $box['location']['name'] ?? $boxDetails['location']['name'] ?? $storage_server->region,
                     'api_token' => $box['username'] ?? $boxDetails['username'] ?? $storage_server->api_token,
@@ -176,6 +178,7 @@ class HetznerStorageService
 
         return $subAccountDetails;
     }
+
 
     public function getSubAccount(int $storageBoxId, int $subAccountId): array
     {

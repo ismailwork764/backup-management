@@ -145,28 +145,48 @@ class ClientController extends Controller
             $query->orderBy('last_seen_at', 'desc');
         }]);
 
-        // Get disk utilization from Hetzner
+
+        // Get disk utilization using SFTP (HetznerHelper)
         $diskUtilization = null;
         try {
-            $hetznerService = app(\App\Services\HetznerStorageService::class);
-            $subAccount = $hetznerService->getSubAccount(
-                $client->storageServer->hetzner_id,
-                $client->hetzner_subaccount_id
-            );
-
-            // Calculate utilization from subaccount data
-            if (isset($subAccount['disk_quota']) && isset($subAccount['disk_usage'])) {
+            $server = $client->storageServer;
+            // When connecting with main account, sub-account directories are accessed by their username
+            // e.g., u448120-sub6, not by home_directory
+            $subAccountDir = $client->home_directory;
+          
+            Log::info("Attempting to fetch disk utilization for client {$client->id}", [
+                'server_address' => $server->server_address ?? 'N/A',
+                'username' => $server->username ?? 'N/A',
+                'subaccount_username' => $client->hetzner_username,
+                'subaccount_dir' => $subAccountDir,
+            ]);
+            
+            $bytes = null;
+            if ($server && $subAccountDir) {
+                $bytes = \App\Helpers\HetznerHelper::getSubAccountUsage($server, $subAccountDir);
+                
+                if ($bytes !== null) {
+                    $client->disk_usage_bytes = $bytes;
+                    $client->save();
+                } else {
+                    Log::warning("Disk utilization returned null for client {$client->id}");
+                }
+            }
+            if ($bytes !== null) {
+                $used_gb = round($bytes / 1024 / 1024 / 1024, 2);
+                $quota_gb = $client->quota_gb;
+                $percentage = $quota_gb > 0 ? round(($used_gb / $quota_gb) * 100, 2) : 0;
                 $diskUtilization = [
-                    'used_gb' => round($subAccount['disk_usage'] / 1024 / 1024 / 1024, 2),
-                    'quota_gb' => round($subAccount['disk_quota'] / 1024 / 1024 / 1024, 2),
-                    'percentage' => $subAccount['disk_quota'] > 0
-                        ? round(($subAccount['disk_usage'] / $subAccount['disk_quota']) * 100, 2)
-                        : 0,
+                    'used_gb' => $used_gb,
+                    'quota_gb' => $quota_gb,
+                    'percentage' => $percentage,
                 ];
             }
         } catch (\Exception $e) {
-            // If we can't fetch utilization, continue without it
-            Log::warning('Failed to fetch disk utilization for client ' . $client->id . ': ' . $e->getMessage());
+            Log::error('Failed to fetch disk utilization for client ' . $client->id . ': ' . $e->getMessage(), [
+                'exception' => get_class($e),
+                'trace' => $e->getTraceAsString()
+            ]);
         }
 
         // Get recent backups
