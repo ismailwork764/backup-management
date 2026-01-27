@@ -25,6 +25,7 @@ class CheckMissingBackups extends Command
                     'type' => 'no_backup',
                     'subject_type' => get_class($agent),
                     'subject_id' => $agent->id,
+                    'sent_at' => null,
                 ],
                 [
                     'message' => "No backup in 3 days for agent {$agent->hostname}",

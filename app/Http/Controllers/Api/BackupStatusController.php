@@ -12,33 +12,32 @@ class BackupStatusController extends Controller
     public function store(Request $request){
 
         $agent = $request->attributes->get('agent');
-
         $request->validate([
-            'status' => 'required|in:success,failed',
+            'result' => 'required|in:success,failed',
             'size_gb' => 'nullable|numeric|min:0',
             'message' => 'nullable|string|max:2000',
         ]);
 
         Backup::create([
             'agent_id' => $agent->id,
-            'status' => $request->status,
+            'status' => $request->result,
             'size_gb' => $request->size_gb,
             'message' => $request->message,
             'created_at' => now(),
         ]);
         
-        // Update agent's last backup timestamp if successful
-        if ($request->status === 'success') {
+        if ($request->result === 'success') {
             $agent->update([
                 'last_backup_at' => now(),
             ]);
         }
-        if ($request->status === 'failed') {
+        if ($request->result === 'failed') {
             Alert::firstOrCreate(
                 [
                     'type' => 'failed_backup',
                     'subject_type' => get_class($agent),
                     'subject_id' => $agent->id,
+                    'sent_at' => null,
                 ],
                 [
                     'message' => "Backup failed for agent {$agent->hostname}",

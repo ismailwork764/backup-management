@@ -30,32 +30,24 @@ class HetznerStorageService
         $data = $response->json();
 
         if (empty($data['storage_boxes'])) {
-            return; // no boxes
+            return; 
         }
 
         foreach ($data['storage_boxes'] as $box) {
             $storageBoxId = $box['id'];
 
-            // Fetch individual storage box to get accurate stats
-            // The list endpoint might not include detailed usage stats
             $boxDetails = null;
             try {
                 $boxDetails = $this->getStorageBox($storageBoxId);
 
             } catch (\Exception $e) {
-                // If we can't fetch details, use data from list
                 Log::warning('Failed to fetch storage box details for ID ' . $storageBoxId . ': ' . $e->getMessage());
                 $boxDetails = $box;
             }
 
-            // Extract usage data - try multiple possible locations
-            // Note: Hetzner API returns size in bytes
-            // We convert to MB first, then to GB for storage (since DB uses integer)
-            // But we'll store in GB rounded, or we could store in MB for more precision
             $usedCapacityBytes = 0;
             $totalCapacityBytes = 0;
 
-            // Try to get from detailed response first
             if (isset($boxDetails['stats']['size_data'])) {
                 $usedCapacityBytes = $boxDetails['stats']['size_data'];
             } elseif (isset($boxDetails['stats']['size'])) {
@@ -64,14 +56,12 @@ class HetznerStorageService
                 $usedCapacityBytes = $box['stats']['size_data'];
             }
 
-            // Get total capacity
             if (isset($boxDetails['storage_box_type']['size'])) {
                 $totalCapacityBytes = $boxDetails['storage_box_type']['size'];
             } elseif (isset($box['storage_box_type']['size'])) {
                 $totalCapacityBytes = $box['storage_box_type']['size'];
             }
 
-            // Convert bytes to GB (with 2 decimal precision)
             $usedCapacity = round($usedCapacityBytes / 1024 / 1024 / 1024, 2);
 
             $totalCapacity = round($totalCapacityBytes / 1024 / 1024 / 1024, 2);
@@ -104,18 +94,16 @@ class HetznerStorageService
             }
         }
 
-        return redirect()->back();
+        return true;
     }
 
     public function createSubAccount(array $data): array
     {
         $storageBoxId = $data['storage_box_id'];
-        // Password should already be valid UTF-8 from the generator, but ensure it's clean
         $password = $data['password'];
         $name = $data['name'] ?? null;
         $homeDirectory = 'client-' . preg_replace('/\s+/', '_', $name);
 
-        // Prepare access settings
         $accessSettings = [
             'reachable_externally' => $data['reachable_externally'] ?? true,
             'samba_enabled' => $data['samba_enabled'] ?? true,
@@ -139,8 +127,6 @@ class HetznerStorageService
 
         $responseData = $response->json();
 
-        // Hetzner API returns action and subaccount objects
-        // The subaccount object contains id and storage_box
         if (!isset($responseData['subaccount']['id'])) {
             throw new \Exception('Invalid Hetzner API response: missing subaccount ID. Response: ' . json_encode($responseData));
         }
@@ -148,23 +134,19 @@ class HetznerStorageService
         $subAccountId = $responseData['subaccount']['id'];
         $actionStatus = $responseData['action']['status'] ?? null;
 
-        // Fetch the full subaccount details to get username and other info
-        // Retry a few times if action is still running (subaccount might not be immediately available)
         $subAccountDetails = null;
         $maxRetries = 5;
-        $retryDelay = 2; // seconds
+        $retryDelay = 2; 
 
         for ($attempt = 0; $attempt < $maxRetries; $attempt++) {
             try {
                 $subAccountDetails = $this->getSubAccount($storageBoxId, $subAccountId);
-                break; // Success, exit retry loop
+                break; 
             } catch (\Exception $e) {
-                // If action is still running and we haven't exhausted retries, wait and retry
                 if ($actionStatus === 'running' && $attempt < $maxRetries - 1) {
                     sleep($retryDelay);
                     continue;
                 }
-                // Otherwise, rethrow the exception
                 throw $e;
             }
         }
@@ -173,7 +155,6 @@ class HetznerStorageService
             throw new \Exception('Failed to fetch subaccount details after ' . $maxRetries . ' attempts');
         }
 
-        // Merge the password we used (API doesn't return it)
         $subAccountDetails['password'] = $password;
 
         return $subAccountDetails;
@@ -192,7 +173,6 @@ class HetznerStorageService
 
         $responseData = $response->json();
 
-        // Hetzner API might return the subaccount directly or nested
         if (isset($responseData['subaccount'])) {
             return $responseData['subaccount'];
         }
@@ -212,7 +192,6 @@ class HetznerStorageService
 
         $responseData = $response->json();
 
-        // Hetzner API might return the storage box directly or nested
         if (isset($responseData['storage_box'])) {
             return $responseData['storage_box'];
         }
@@ -231,6 +210,35 @@ class HetznerStorageService
         }
     }
 
+    public function syncMetadata()
+    {
+        $types = $this->getStorageBoxTypes();
+        
+        foreach ($types as $type) {
+            \App\Models\StorageBoxType::updateOrCreate(
+                ['hetzner_id' => $type['id']],
+                [
+                    'name' => $type['name'],
+                    'description' => $type['description'] ?? null,
+                    'size_bytes' => $type['size'],
+                    'prices' => $type['prices'],
+                ]
+            );
+        }
+
+        $locations = $this->getLocations();
+        foreach ($locations as $loc) {
+            \App\Models\Location::updateOrCreate(
+                ['name' => $loc['name']],
+                [
+                    'description' => $loc['description'] ?? null,
+                    'city' => $loc['city'] ?? null,
+                    'country' => $loc['country'] ?? null,
+                ]
+            );
+        }
+    }
+
     public function getStorageBoxTypes(): array
     {
         $response = Http::withHeaders([
@@ -246,14 +254,9 @@ class HetznerStorageService
 
     public function getLocations(): array
     {
-        // Extract unique locations from storage box types pricing
-        // Since Hetzner Storage Box API doesn't have a dedicated locations endpoint,
-        // we get locations from where storage boxes are actually available
-
         try {
             $storageBoxTypes = $this->getStorageBoxTypes();
 
-            // Map of known location IDs to their details
             $locationMap = [
                 'fsn1' => ['id' => 'fsn1', 'name' => 'fsn1', 'description' => 'Falkenstein DC Park 1', 'country' => 'DE', 'city' => 'Falkenstein'],
                 'hel1' => ['id' => 'hel1', 'name' => 'hel1', 'description' => 'Helsinki 1', 'country' => 'FI', 'city' => 'Helsinki'],
@@ -276,7 +279,6 @@ class HetznerStorageService
 
             return array_values($availableLocations);
         } catch (\Exception $e) {
-            // Fallback: return known locations
             Log::warning('Failed to extract locations from storage box types: ' . $e->getMessage());
             return [
                 ['id' => 'fsn1', 'name' => 'fsn1', 'description' => 'Falkenstein DC Park 1', 'country' => 'DE', 'city' => 'Falkenstein'],
@@ -287,7 +289,6 @@ class HetznerStorageService
 
     public function createStorageBox(array $data): array
     {
-        // Prepare the request payload
         $payload = [
             'name' => $data['name'],
             'location' => $data['location'],
@@ -295,7 +296,6 @@ class HetznerStorageService
             'password' => $data['password'],
         ];
 
-        // Add optional fields if provided
         if (!empty($data['labels'])) {
             $payload['labels'] = $data['labels'];
         }

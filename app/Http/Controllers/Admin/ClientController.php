@@ -76,22 +76,19 @@ class ClientController extends Controller
         DB::beginTransaction();
 
         try {
-            // 1️⃣ Generate unique registration key
             do {
                 $registrationKey = strtoupper(Str::random(5) . '-' . Str::random(5));
             } while (Client::where('registration_key', $registrationKey)->exists());
 
-            // 2️⃣ Create Hetzner sub-account via service
             $hetznerService = app(\App\Services\HetznerStorageService::class);
             $password = $request->password ?? $this->generateStrongPassword(16);
 
-            // Prepare access settings from form
             $home_directory = 'client-' . preg_replace('/\s+/', '_', $request->name);
             $subAccount = $hetznerService->createSubAccount([
-                'storage_box_id' => $storageServer->hetzner_id, // Hetzner ID
-                'name' => $request->name,                       // optional subaccount name
+                'storage_box_id' => $storageServer->hetzner_id, 
+                'name' => $request->name,                       
                 'password' => $password,
-                'home_directory' => $home_directory,                        // default home dir
+                'home_directory' => $home_directory,                        
                 'reachable_externally' => $request->has('reachable_externally') ? true : false,
                 'samba_enabled' => $request->has('samba_enabled') ? true : false,
                 'ssh_enabled' => $request->has('ssh_enabled') ? true : false,
@@ -99,16 +96,14 @@ class ClientController extends Controller
                 'readonly' => $request->has('readonly') ? true : false,
             ]);
 
-            // Validate response structure
             if (!isset($subAccount['username']) || !isset($subAccount['id'])) {
                 throw new \Exception('Invalid Hetzner API response: missing required fields. Response: ' . json_encode($subAccount));
             }
 
             $hetznerUsername = $subAccount['username'];
-            $hetznerPassword = $subAccount['password'] ?? $password; // Use provided password if API doesn't return it
+            $hetznerPassword = $subAccount['password'] ?? $password; 
             $hetznerSubaccountId = $subAccount['id'];
 
-            // 3️⃣ Store client in DB
             $client = Client::create([
                 'name' => $request->name,
                 'storage_server_id' => $storageServer->id,
@@ -146,50 +141,18 @@ class ClientController extends Controller
         }]);
 
 
-        // Get disk utilization using SFTP (HetznerHelper)
         $diskUtilization = null;
-        try {
-            $server = $client->storageServer;
-            // When connecting with main account, sub-account directories are accessed by their username
-            // e.g., u448120-sub6, not by home_directory
-            $subAccountDir = $client->home_directory;
-          
-            Log::info("Attempting to fetch disk utilization for client {$client->id}", [
-                'server_address' => $server->server_address ?? 'N/A',
-                'username' => $server->username ?? 'N/A',
-                'subaccount_username' => $client->hetzner_username,
-                'subaccount_dir' => $subAccountDir,
-            ]);
-            
-            $bytes = null;
-            if ($server && $subAccountDir) {
-                $bytes = \App\Helpers\HetznerHelper::getSubAccountUsage($server, $subAccountDir);
-                
-                if ($bytes !== null) {
-                    $client->disk_usage_bytes = $bytes;
-                    $client->save();
-                } else {
-                    Log::warning("Disk utilization returned null for client {$client->id}");
-                }
-            }
-            if ($bytes !== null) {
-                $used_gb = round($bytes / 1024 / 1024 / 1024, 2);
-                $quota_gb = $client->quota_gb;
-                $percentage = $quota_gb > 0 ? round(($used_gb / $quota_gb) * 100, 2) : 0;
-                $diskUtilization = [
-                    'used_gb' => $used_gb,
-                    'quota_gb' => $quota_gb,
-                    'percentage' => $percentage,
-                ];
-            }
-        } catch (\Exception $e) {
-            Log::error('Failed to fetch disk utilization for client ' . $client->id . ': ' . $e->getMessage(), [
-                'exception' => get_class($e),
-                'trace' => $e->getTraceAsString()
-            ]);
+        if ($client->quota_gb > 0) {
+            $used_gb = round($client->disk_usage_bytes / 1024 / 1024 / 1024, 2);
+            $quota_gb = $client->quota_gb;
+            $percentage = $quota_gb > 0 ? round(($used_gb / $quota_gb) * 100, 2) : 0;
+            $diskUtilization = [
+                'used_gb' => $used_gb,
+                'quota_gb' => $quota_gb,
+                'percentage' => $percentage,
+            ];
         }
 
-        // Get recent backups
         $recentBackups = $client->agents()
             ->with(['backups' => function($query) {
                 $query->orderBy('created_at', 'desc')->limit(10);
@@ -205,7 +168,6 @@ class ClientController extends Controller
 
     public function destroyAgent(Client $client, Agent $agent)
     {
-        // Ensure agent belongs to client
         if ($agent->client_id !== $client->id) {
             return back()->withErrors(['error' => 'Agent does not belong to this client']);
         }
@@ -224,15 +186,11 @@ class ClientController extends Controller
 
     public function generateStrongPassword(int $length = 16): string
     {
-        // Hetzner allowed characters: a-z A-Z Ä Ö Ü ä ö ü ß 0-9 ^ ° ! § $ % / ( ) = ? + # - . , ; : ~ * @ { } _ &
-        // Define characters explicitly to avoid encoding issues
         $upper = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
         $lower = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];
         $numbers = ['0','1','2','3','4','5','6','7','8','9'];
-        // Special characters: ^ ° ! § $ % / ( ) = ? + # - . , ; : ~ * @ { } _ &
         $special = ['^', '°', '!', '§', '$', '%', '/', '(', ')', '=', '?', '+', '#', '-', '.', ',', ';', ':', '~', '*', '@', '{', '}', '_', '&'];
 
-        // Ensure at least one of each type
         $password = [
             $upper[random_int(0, count($upper)-1)],
             $lower[random_int(0, count($lower)-1)],

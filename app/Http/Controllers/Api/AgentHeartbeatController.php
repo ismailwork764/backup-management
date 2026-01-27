@@ -9,8 +9,8 @@ class AgentHeartbeatController extends Controller
 {
     public function store(Request $request)
     {
+        
         $agent = $request->attributes->get('agent');
-
         if (!$agent) {
             return response()->json([
                 'message' => 'Unauthorized'

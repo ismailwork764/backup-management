@@ -12,30 +12,22 @@ use App\Models\StorageServer;
 
 class HetznerHelper
 {
-    /**
-     * Get total storage usage (in bytes) for a subaccount directory on a specific Hetzner Storage Box.
-     *
-     * @param StorageServer $server
-     * @param string $subAccountName Directory name for the subaccount
-     * @return int Total size in bytes
-     */
     public static function getSubAccountUsage(StorageServer $server, $subAccountName)
     {
         try {
-            // Create SFTP connection using positional arguments
             $connectionProvider = new SftpConnectionProvider(
-                $server->server_address,  // host
-                $server->username,         // username
-                $server->password,         // password
-                null,                      // privateKey
-                null,                      // passphrase
-                22,                        // port
-                false,                     // useAgent
-                10,                        // timeout
-                10,                        // maxTries
-                null,                      // hostFingerprint
-                null,                      // connectivityChecker
-                []                         // preferredAlgorithms (must be array)
+                $server->server_address,  
+                $server->username,         
+                $server->password,         
+                null,                      
+                null,                      
+                22,                        
+                false,                     
+                10,                        
+                10,                        
+                null,                      
+                null,                      
+                []                         
             );
             
             $adapter = new SftpAdapter($connectionProvider, '/');
@@ -45,15 +37,12 @@ class HetznerHelper
             Log::info("Listing contents of directory: {$subAccountName}");
             $files = $filesystem->listContents($subAccountName, true);
             
-            // Convert iterator to array for debugging
             $filesArray = iterator_to_array($files);
             Log::info("Found " . count($filesArray) . " items in directory: {$subAccountName}");
        
             $totalSize = 0;
             $fileCount = 0;
             foreach ($filesArray as $file) {
-        
-                
                 if (($file['type'] ?? null) === 'file' && isset($file['fileSize'])) {
                     $totalSize += $file['fileSize'];
                     $fileCount++;

@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\StorageServer;
+use App\Models\StorageBoxType;
+use App\Models\Location;
 use App\Models\Client;
 use Yajra\DataTables\DataTables;
 use Illuminate\Support\Facades\Log;
@@ -20,15 +22,13 @@ class StorageServerController extends Controller
     public function create()
     {
         try {
-            $hetznerService = app(\App\Services\HetznerStorageService::class);
-
-            $storageBoxTypes = $hetznerService->getStorageBoxTypes();
-            $locations = $hetznerService->getLocations();
+            $storageBoxTypes = StorageBoxType::all();
+            $locations = Location::all();
 
             return view('admin.storage_servers.create', compact('storageBoxTypes', 'locations'));
         } catch (\Exception $e) {
             return redirect()->route('admin.storage_servers.index')
-                ->withErrors(['error' => 'Failed to load storage box types and locations: ' . $e->getMessage()]);
+                ->withErrors(['error' => 'Failed to load storage box types and locations from database: ' . $e->getMessage()]);
         }
     }
 
@@ -44,7 +44,6 @@ class StorageServerController extends Controller
         try {
             $hetznerService = app(\App\Services\HetznerStorageService::class);
 
-            // Parse labels if provided
             $labels = [];
             if ($request->has('labels') && is_array($request->input('labels'))) {
                 foreach ($request->input('labels') as $key => $value) {
@@ -54,7 +53,6 @@ class StorageServerController extends Controller
                 }
             }
 
-            // Parse access settings
             $accessSettings = [
                 'reachable_externally' => $request->has('reachable_externally'),
                 'samba_enabled' => $request->has('samba_enabled'),
@@ -63,7 +61,6 @@ class StorageServerController extends Controller
                 'zfs_enabled' => $request->has('zfs_enabled'),
             ];
 
-            // Create storage box via Hetzner API
             $storageBox = $hetznerService->createStorageBox([
                 'name' => $request->name,
                 'location' => $request->location,
@@ -74,7 +71,6 @@ class StorageServerController extends Controller
                 'access_settings' => $accessSettings,
             ]);
 
-            // Store in database
             StorageServer::create([
                 'hetzner_id' => $storageBox['id'],
                 'name' => $storageBox['name'],
@@ -142,16 +138,7 @@ class StorageServerController extends Controller
             $query->withCount('agents');
         }]);
 
-        // Get fresh data from Hetzner API
-        $hetznerData = null;
-        try {
-            $hetznerService = app(\App\Services\HetznerStorageService::class);
-            $hetznerData = $hetznerService->getStorageBox($storageServer->hetzner_id);
-        } catch (\Exception $e) {
-            \Log::warning('Failed to fetch Hetzner data for storage server ' . $storageServer->id . ': ' . $e->getMessage());
-        }
-
-        return view('admin.storage_servers.show', compact('storageServer', 'hetznerData'));
+        return view('admin.storage_servers.show', compact('storageServer'));
     }
 
     public function sync()
@@ -170,7 +157,6 @@ class StorageServerController extends Controller
 
     public function destroySubaccount(StorageServer $storageServer, Client $client)
     {
-        // Ensure client belongs to this storage server
         if ($client->storage_server_id !== $storageServer->id) {
             return back()->withErrors(['error' => 'Client does not belong to this storage server']);
         }
@@ -178,13 +164,11 @@ class StorageServerController extends Controller
         try {
             $hetznerService = app(\App\Services\HetznerStorageService::class);
 
-            // Delete subaccount from Hetzner
             $hetznerService->deleteSubAccount(
                 $storageServer->hetzner_id,
                 $client->hetzner_subaccount_id
             );
 
-            // Delete client (this will cascade delete agents and backups)
             $client->delete();
 
             return redirect()->route('admin.storage_servers.show', $storageServer->id)
@@ -197,17 +181,14 @@ class StorageServerController extends Controller
     public function destroy(StorageServer $storageServer)
     {
         try {
-            // Check if storage server has any clients
             if ($storageServer->clients()->count() > 0) {
                 return back()->withErrors(['error' => 'Cannot delete storage server that has clients. Please delete all clients first.']);
             }
 
             $hetznerService = app(\App\Services\HetznerStorageService::class);
 
-            // Delete storage box from Hetzner
             $hetznerService->deleteStorageBox($storageServer->hetzner_id);
 
-            // Delete from database
             $storageServer->delete();
 
             return redirect()->route('admin.storage_servers.index')

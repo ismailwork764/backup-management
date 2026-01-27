@@ -13,16 +13,14 @@ Route::get('/', function () {
 });
 
 Route::get('/about', function () {
-    $service = app(\App\Services\HetznerStorageService::class);
-    $service->syncStorageBoxes();
-
-    return redirect()->back()->with('success', 'Storage boxes synced!');
+    return view('welcome');
 })->name('about');
 
 
 Route::get('/dashboard', function () {
     return redirect()->route('admin.dashboard');
 })->middleware(['auth'])->name('dashboard');
+
 Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
     Route::get('clients', [ClientController::class, 'index'])->name('admin.clients.index');
@@ -50,8 +48,6 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::get('api/reports/storage-utilization', [ReportController::class, 'storageUtilization'])->name('admin.reports.storage-utilization');
     Route::get('api/reports/monthly-usage', [ReportController::class, 'monthlyUsage'])->name('admin.reports.monthly-usage');
 });
-
-
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

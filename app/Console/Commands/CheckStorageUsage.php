@@ -27,6 +27,7 @@ class CheckStorageUsage extends Command
                         'type' => 'storage_threshold',
                         'subject_type' => get_class($server),
                         'subject_id' => $server->id,
+                        'sent_at' => null,
                     ],
                     [
                         'message' => "Storage server {$server->name} is at {$usage}% usage",

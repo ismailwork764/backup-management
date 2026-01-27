@@ -7,6 +7,7 @@ use App\Models\Agent;
 use App\Models\Client;
 use App\Models\StorageServer;
 use App\Models\Backup;
+use App\Models\Alert;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
@@ -35,6 +36,10 @@ class DashboardController extends Controller
             ->where('created_at', '>=', now()->subDay())
             ->count();
 
+        $recentAlerts = Alert::where('created_at', '>=', now()->subMinutes(5))
+            ->orderByDesc('created_at')
+            ->get(['id', 'message', 'type', 'created_at']);
+
         return response()->json([
             'clients' => $totalClients,
             'agents' => [
@@ -49,6 +54,7 @@ class DashboardController extends Controller
                     : 0,
             ],
             'failed_backups_24h' => $failedBackups,
+            'recent_alerts' => $recentAlerts
         ]);
     }
 }

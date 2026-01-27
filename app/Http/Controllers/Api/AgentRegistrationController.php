@@ -30,7 +30,6 @@ class AgentRegistrationController extends Controller
             ], 401);
         }
 
-        // Validate client has required storage information
         if (!$client->storageServer) {
             return response()->json([
                 'message' => 'Client storage server not configured'
@@ -59,18 +58,15 @@ class AgentRegistrationController extends Controller
         ]);
 
 
-        // Get storage box details for connection info
         $storageServer = $client->storageServer;
         $hetznerService = app(\App\Services\HetznerStorageService::class);
 
-        // Fetch storage box details to get hostname (with error handling)
         $storageBoxDetails = null;
         $storageHostname = null;
         try {
             $storageBoxDetails = $hetznerService->getStorageBox($storageServer->hetzner_id);
             $storageHostname = $storageBoxDetails['server'] ?? null;
         } catch (\Exception $e) {
-            // Log error but continue - we can still provide credentials
             Log::warning('Failed to fetch storage box details during agent registration: ' . $e->getMessage());
         }
 

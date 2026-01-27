@@ -6,6 +6,10 @@
 <h1>Reports</h1>
 @stop
 
+@section('css')
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css">
+@stop
+
 @section('content')
 <ul class="nav nav-tabs" id="reportTabs" role="tablist">
     <li class="nav-item">
@@ -26,14 +30,13 @@
 </ul>
 
 <div class="tab-content mt-3" id="reportTabsContent">
-    <!-- Storage Utilization Tab -->
     <div class="tab-pane fade show active" id="storage" role="tabpanel">
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">Current Storage Utilization per Client</h3>
             </div>
             <div class="card-body">
-                <table id="storage-table" class="table table-bordered table-striped">
+                <table id="storage-table" class="table table-bordered table-striped" style="width: 100%">
                     <thead>
                         <tr>
                             <th>Client</th>
@@ -51,14 +54,13 @@
         </div>
     </div>
 
-    <!-- Monthly History Tab -->
     <div class="tab-pane fade" id="monthly" role="tabpanel">
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">Monthly Usage History (Highest GB per Month)</h3>
             </div>
             <div class="card-body">
-                <table id="monthly-table" class="table table-bordered table-striped">
+                <table id="monthly-table" class="table table-bordered table-striped" style="width: 100%">
                     <thead>
                         <tr>
                             <th>Client</th>
@@ -73,14 +75,13 @@
         </div>
     </div>
 
-    <!-- Backup Summary Tab -->
     <div class="tab-pane fade" id="backups" role="tabpanel">
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">Client Backup Summary</h3>
             </div>
             <div class="card-body">
-                <table id="backups-table" class="table table-bordered table-striped">
+                <table id="backups-table" class="table table-bordered table-striped" style="width: 100%">
                     <thead>
                         <tr>
                             <th>Client</th>
@@ -104,7 +105,6 @@
 
 <script>
 $(function () {
-    // Storage Utilization Table
     $('#storage-table').DataTable({
         processing: true,
         serverSide: true,
@@ -118,10 +118,10 @@ $(function () {
             { data: 'usage_bar', orderable: false, searchable: false },
             { data: 'actions', orderable: false, searchable: false }
         ],
-        order: [[2, 'desc']] // Sort by used GB descending
+        order: [[2, 'desc']],
+        width: '100%'
     });
 
-    // Monthly Usage Table
     $('#monthly-table').DataTable({
         processing: true,
         serverSide: true,
@@ -132,10 +132,10 @@ $(function () {
             { data: 'max_used_gb' },
             { data: 'actions', orderable: false, searchable: false }
         ],
-        order: [[1, 'desc']] // Sort by month descending
+        order: [[1, 'desc']],
+        width: '100%'
     });
 
-    // Backup Summary Table
     $('#backups-table').DataTable({
         processing: true,
         serverSide: true,
@@ -147,7 +147,13 @@ $(function () {
             { data: 'failed_count' },
             { data: 'total_gb' }
         ],
-        order: [[1, 'desc']] // Sort by month descending
+        order: [[1, 'desc']],
+        width: '100%'
+    });
+
+    $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        $($.fn.dataTable.tables(true)).DataTable()
+            .columns.adjust();
     });
 });
 </script>

@@ -47,7 +47,6 @@
                     <input type="number" name="quota_gb" class="form-control" min="10" required>
                 </div>
 
-                <!-- Access Settings Section -->
                 <div class="form-group">
                     <label><strong>Access Protocols</strong></label>
                     <p style="font-size: 0.9em; color: #666; margin-bottom: 1rem;">Select which protocols should be enabled for this client's subaccount</p>

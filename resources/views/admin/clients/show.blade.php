@@ -2,6 +2,8 @@
 
 @section('title', 'Client Details')
 
+@section('plugins.Sweetalert2', true)
+
 @section('content_header')
     <h1>Client Details: {{ $client->name }}</h1>
 @stop
@@ -234,11 +236,42 @@
         </a>
     </div>
 
+@stop
+
+@section('js')
     <script>
         function copyToClipboard(text) {
-            navigator.clipboard.writeText(text)
-                .then(() => alert('Copied to clipboard!'))
-                .catch(() => alert('Failed to copy'));
+            if (!navigator.clipboard) {
+                var textArea = document.createElement("textarea");
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Copied!',
+                        text: 'Content copied to clipboard',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                } catch (err) {
+                    console.error('Fallback: Oops, unable to copy', err);
+                }
+                document.body.removeChild(textArea);
+                return;
+            }
+            navigator.clipboard.writeText(text).then(function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Copied!',
+                    text: 'Content copied to clipboard',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            }, function(err) {
+                console.error('Async: Could not copy text: ', err);
+            });
         }
     </script>
 @stop

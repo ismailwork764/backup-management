@@ -19,20 +19,15 @@ Route::middleware('agent.auth')->group(function () {
     Route::post('/heartbeat', [AgentHeartbeatController::class, 'store']);
     Route::post('/backup-status', [BackupStatusController::class, 'store']);
 });
+
 Route::middleware(['auth:sanctum', 'admin'])->prefix('admin')->group(function () {
-        // Sanctum-based API routes
-    });
+});
 
-
-        Route::get('/dashboard/summary', [DashboardController::class, 'summary']);
-
+Route::get('/dashboard/summary', [DashboardController::class, 'summary']);
 
 Route::prefix('admin')->group(function () {
-
     Route::get('/agents', [AgentController::class, 'index']);
     Route::get('/storage-servers', [StorageServerController::class, 'index']);
     Route::get('/agents/{agent}/backups', [AgentController::class, 'backups']);
     Route::get('/reports/monthly-usage', [ReportController::class, 'monthlyUsage']);
-
 });
-

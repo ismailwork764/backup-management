@@ -19,6 +19,10 @@
 </div>
 @stop
 
+@section('css')
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css">
+@stop
+
 @section('content')
 @if (session('success'))
     <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -48,7 +52,7 @@
         <h3 class="card-title">All Storage Servers</h3>
     </div>
     <div class="card-body">
-        <table id="servers-table" class="table table-bordered table-striped">
+        <table id="servers-table" class="table table-bordered table-striped" style="width: 100%">
             <thead>
                 <tr>
                     <th>ID</th>

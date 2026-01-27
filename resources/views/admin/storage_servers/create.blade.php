@@ -34,7 +34,6 @@
             @csrf
             <div class="card-body">
 
-                <!-- Basic Information Section -->
                 <h5 class="mb-3"><i class="fas fa-info-circle"></i> Basic Information</h5>
 
                 <div class="form-group">
@@ -52,8 +51,8 @@
                         <select name="location" id="location" class="form-control @error('location') is-invalid @enderror" required>
                             <option value="">-- Select Location --</option>
                             @foreach($locations as $location)
-                                <option value="{{ $location['id'] }}" @selected(old('location') == $location['id'])>
-                                    {{ $location['name'] }} - {{ $location['description'] }} ({{ $location['country'] }})
+                                <option value="{{ $location->name }}" @selected(old('location') == $location->name)>
+                                    {{ $location->name }} - {{ $location->description }} ({{ $location->country }})
                                 </option>
                             @endforeach
                         </select>
@@ -67,8 +66,8 @@
                         <select name="storage_box_type" id="storage_box_type" class="form-control @error('storage_box_type') is-invalid @enderror" required>
                             <option value="">-- Select Type --</option>
                             @foreach($storageBoxTypes as $type)
-                                <option value="{{ $type['id'] }}" @selected(old('storage_box_type') == $type['id'])>
-                                    {{ $type['name'] }} - {{ $type['description'] }} ({{ round($type['size'] / 1024 / 1024 / 1024, 0) }} GB)
+                                <option value="{{ $type->hetzner_id }}" @selected(old('storage_box_type') == $type->hetzner_id)>
+                                    {{ $type->name }} - {{ $type->description }} ({{ round($type->size_bytes / 1024 / 1024 / 1024, 0) }} GB)
                                 </option>
                             @endforeach
                         </select>
@@ -99,7 +98,6 @@
 
                 <hr>
 
-                <!-- Access Settings Section -->
                 <h5 class="mb-3"><i class="fas fa-lock"></i> Access Settings</h5>
 
                 <div class="custom-control custom-checkbox">
@@ -144,7 +142,6 @@
 
                 <hr>
 
-                <!-- Advanced Options -->
                 <div class="custom-control custom-checkbox">
                     <input type="checkbox" id="show-advanced" class="custom-control-input">
                     <label class="custom-control-label" for="show-advanced">
@@ -195,7 +192,6 @@
         </form>
     </div>
 
-    <!-- Confirmation Modal -->
     <div class="modal fade" id="confirm-modal" tabindex="-1" role="dialog" aria-labelledby="confirm-label" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -235,7 +231,6 @@
 @section('js')
 <script>
 $(function() {
-    // Toggle password visibility
     $('#toggle-password').click(function() {
         const passwordInput = $('#password');
         const icon = $(this).find('i');
@@ -248,12 +243,10 @@ $(function() {
         }
     });
 
-    // Toggle advanced options
     $('#show-advanced').change(function() {
         $('#advanced-section').toggle();
     });
 
-    // Add label
     let labelCount = 1;
     $('#add-label').click(function() {
         const html = `
@@ -273,12 +266,10 @@ $(function() {
         labelCount++;
     });
 
-    // Remove label
     $(document).on('click', '.remove-label', function() {
         $(this).closest('.label-row').remove();
     });
 
-    // Confirmation modal
     $('#submit-btn').click(function() {
         $('#confirm-name').text($('#name').val());
         $('#confirm-location').text($('#location option:selected').text());

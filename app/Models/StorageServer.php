@@ -41,33 +41,21 @@ class StorageServer extends Model
         return $this->hasMany(Client::class);
     }
 
-    /**
-     * Format storage capacity to show MB or GB based on value
-     * If below 1 GB, show in MB. If above 1 GB, show in GB with decimal
-     */
     public function formatStorageCapacity($capacityInGb)
     {
         if ($capacityInGb < 1) {
-            // Convert to MB
             $mb = $capacityInGb * 1024;
             return round($mb) . ' MB';
         } else {
-            // Show in GB with 1 decimal place
             return number_format($capacityInGb, 1) . ' GB';
         }
     }
 
-    /**
-     * Get formatted used storage capacity
-     */
     public function getFormattedUsedCapacity()
     {
         return $this->formatStorageCapacity($this->used_capacity_gb);
     }
 
-    /**
-     * Get formatted total storage capacity
-     */
     public function getFormattedTotalCapacity()
     {
         return $this->formatStorageCapacity($this->total_capacity_gb);

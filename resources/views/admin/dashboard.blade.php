@@ -2,13 +2,14 @@
 
 @section('title', 'Dashboard')
 
+@section('plugins.Sweetalert2', true)
+
 @section('content_header')
 <h1>Dashboard</h1>
 @stop
 
 @section('content')
 <div class="row" x-data="dashboardData()" x-init="init()">
-    <!-- Clients -->
     <div class="col-lg-3 col-6">
         <div class="small-box bg-info">
             <div class="inner">
@@ -21,7 +22,6 @@
         </div>
     </div>
 
-    <!-- Active Agents -->
     <div class="col-lg-3 col-6">
         <div class="small-box bg-success">
             <div class="inner">
@@ -34,7 +34,6 @@
         </div>
     </div>
 
-    <!-- Offline Agents -->
     <div class="col-lg-3 col-6">
         <div class="small-box bg-danger">
             <div class="inner">
@@ -47,7 +46,6 @@
         </div>
     </div>
 
-    <!-- Storage Usage -->
     <div class="col-lg-3 col-6">
         <div class="small-box bg-warning">
             <div class="inner">
@@ -60,7 +58,6 @@
         </div>
     </div>
 
-    <!-- Failed Backups -->
     <div class="col-lg-3 col-6">
         <div class="small-box bg-danger">
             <div class="inner">
@@ -91,14 +88,15 @@ function dashboardData() {
                 used_gb: 0,
                 usage_percent: 0
             },
-            failed_backups_24h: 0
+            failed_backups_24h: 0,
+            recent_alerts: []
         },
-        refreshInterval: 10000, // 10 seconds
+        refreshInterval: 10000, 
         refreshTimer: null,
+        knownAlertIds: new Set(),
 
         init() {
             this.fetchSummary();
-            // Auto-refresh every 10 seconds
             this.refreshTimer = setInterval(() => {
                 this.fetchSummary();
             }, this.refreshInterval);
@@ -108,13 +106,36 @@ function dashboardData() {
             try {
                 const response = await fetch('/api/dashboard/summary');
                 if (response.ok) {
-                    this.summary = await response.json();
+                    const data = await response.json();
+                    this.summary = data;
+                    
+                    if (data.recent_alerts && data.recent_alerts.length > 0) {
+                        data.recent_alerts.forEach(alert => {
+                            if (!this.knownAlertIds.has(alert.id)) {
+                                this.showNotification(alert);
+                                this.knownAlertIds.add(alert.id);
+                            }
+                        });
+                    }
                 } else {
                     console.error('Failed to fetch dashboard summary');
                 }
             } catch (error) {
                 console.error('Error fetching dashboard data:', error);
             }
+        },
+
+        showNotification(alert) {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 5000,
+                timerProgressBar: true,
+                icon: 'error',
+                title: 'System Alert',
+                text: alert.message
+            });
         },
 
         destroy() {

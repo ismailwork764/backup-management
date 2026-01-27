@@ -48,32 +48,15 @@ class ReportController extends Controller
     public function storageUtilization()
     {
         $clients = Client::with('storageServer')->where('is_active', true)->get();
-        
         $utilization = [];
-        //$hetznerService = app(HetznerStorageService::class);
-        
         foreach ($clients as $client) {
-         
             $usedGb = 0;
-            $quotaGb = $client->quota_gb;
+            $quotaGb = (float) $client->quota_gb;
             $percentage = 0;
-            
-            try {
-                /*$subAccount = $hetznerService->getSubAccount(
-                    $client->storageServer->hetzner_id,
-                    $client->hetzner_subaccount_id
-                );*/
-                
-                if (isset($client['quota_gb']) && isset($client['disk_usage_bytes'])) {
-                    $usedGb = round($client['disk_usage_bytes'] / 1024 / 1024 / 1024, 2);
-                    $quotaGb = (float) $client->quota_gb;
-                    $percentage = $quotaGb > 0
-                        ? round(($usedGb / $quotaGb) * 100)
-                        : 0;
-                }
-            } catch (\Exception $e) {
-                // If we can't fetch, use quota from database
-                \Log::warning('Failed to fetch storage utilization for client ' . $client->id . ': ' . $e->getMessage());
+
+            if ($quotaGb > 0) {
+                $usedGb = round(($client->disk_usage_bytes ?? 0) / 1024 / 1024 / 1024, 2);
+                $percentage = round(($usedGb / $quotaGb) * 100);
             }
             
             $utilization[] = [
@@ -85,7 +68,6 @@ class ReportController extends Controller
                 'percentage' => $percentage,
                 'available_gb' => max(0, $quotaGb - $usedGb),
             ];
-            
         }
         
         return DataTables::of(collect($utilization))

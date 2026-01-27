@@ -6,13 +6,17 @@
 <h1>Agents</h1>
 @stop
 
+@section('css')
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css">
+@stop
+
 @section('content')
 <div class="card">
     <div class="card-header">
         <h3 class="card-title">Agent List</h3>
     </div>
     <div class="card-body">
-        <table id="agents-table" class="table table-bordered table-striped">
+        <table id="agents-table" class="table table-bordered table-striped" style="width: 100%">
             <thead>
                 <tr>
                     <th>ID</th>
