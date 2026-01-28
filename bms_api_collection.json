@@ -1,0 +1,150 @@
+{
+    "info": {
+        "_postman_id": "bms-agent-api",
+        "name": "BMS Agent API",
+        "description": "Collection for Backup Management System (BMS) Agents",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "1. Register Agent",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Accept",
+                        "value": "application/json",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "json",
+                    "json": {
+                        "hostname": "my-backup-server-01",
+                        "registration_key": "{{registration_key}}"
+                    }
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/register",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "register"
+                    ]
+                },
+                "description": "Register a new agent using the client's registration key. Returns an `api_token` for subsequent requests."
+            },
+            "response": []
+        },
+        {
+            "name": "2. Agent Heartbeat",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{api_token}}",
+                        "type": "text"
+                    }
+                ],
+                "url": {
+                    "raw": "{{base_url}}/api/heartbeat",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "heartbeat"
+                    ]
+                },
+                "description": "Send a heartbeat to let the system know the agent is still online."
+            },
+            "response": []
+        },
+        {
+            "name": "3. Backup Status (Success)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{api_token}}",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "json",
+                    "json": {
+                        "result": "success",
+                        "size_gb": 1.25,
+                        "message": "Backup completed successfully using SFTP."
+                    }
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/backup-status",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "backup-status"
+                    ]
+                },
+                "description": "Report a successful backup result."
+            },
+            "response": []
+        },
+        {
+            "name": "4. Backup Status (Failed)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{api_token}}",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "json",
+                    "json": {
+                        "result": "failed",
+                        "size_gb": 0,
+                        "message": "Error: Connection timeout to Hetzner Storage Box."
+                    }
+                },
+                "url": {
+                    "raw": "{{base_url}}/api/backup-status",
+                    "host": [
+                        "{{base_url}}"
+                    ],
+                    "path": [
+                        "api",
+                        "backup-status"
+                    ]
+                },
+                "description": "Report a failed backup result. This will trigger an alert in the BMS dashboard."
+            },
+            "response": []
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "https://share.pixel-shift.de/backup",
+            "type": "string"
+        },
+        {
+            "key": "registration_key",
+            "value": "your-key-here",
+            "type": "string"
+        },
+        {
+            "key": "api_token",
+            "value": "token-from-register-endpoint",
+            "type": "string"
+        }
+    ]
+}

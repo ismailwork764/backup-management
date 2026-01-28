@@ -35,92 +35,94 @@
     <div class="card">
         <div class="card-body">
             <h5>Client Info</h5>
-            <table class="table table-bordered">
-                <tr>
-                    <th>Name</th>
-                    <td>{{ $client->name }}</td>
-                </tr>
-                <tr>
-                    <th>Storage Server</th>
-                    <td>{{ $client->storageServer->name }} ({{ $client->storageServer->region }})</td>
-                </tr>
-                <tr>
-                    <th>Server Address</th>
-                    <td>{{ $client->storageServer->server_address }}</td>
-                </tr>
-                <tr>
-                    <th>Quota (GB)</th>
-                    <td>{{ $client->quota_gb }}</td>
-                </tr>
-                <tr>
-                    <th>Access Protocols</th>
-                    <td>
-                        @php
-                            $protocols = [
-                                'Reachable Externally' => $client->reachable_externally,
-                                'SSH' => $client->ssh_enabled,
-                                'Samba/SMB' => $client->samba_enabled,
-                                'WebDAV' => $client->webdav_enabled,
-                                'Read-Only' => $client->readonly,
-                            ];
-                        @endphp
-                        @foreach($protocols as $name => $enabled)
-                            @if($enabled)
-                                <span class="badge badge-success">
-                                    <i class="fas fa-check"></i> {{ $name }}
-                                </span>
-                            @else
-                                <span class="badge badge-secondary">
-                                    <i class="fas fa-times"></i> {{ $name }}
-                                </span>
-                            @endif
-                        @endforeach
-                    </td>
-                </tr>
-                @if($diskUtilization)
-                <tr>
-                    <th>Disk Utilization</th>
-                    <td>
-                        <div class="progress" style="height: 25px;">
-                            <div class="progress-bar {{ $diskUtilization['percentage'] > 80 ? 'bg-danger' : ($diskUtilization['percentage'] > 60 ? 'bg-warning' : 'bg-success') }}"
-                                 role="progressbar"
-                                 style="width: {{ $diskUtilization['percentage'] }}%"
-                                 aria-valuenow="{{ $diskUtilization['percentage'] }}"
-                                 aria-valuemin="0"
-                                 aria-valuemax="100">
-                                {{ $diskUtilization['used_gb'] }} GB / {{ $diskUtilization['quota_gb'] }} GB ({{ $diskUtilization['percentage'] }}%)
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Name</th>
+                        <td>{{ $client->name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Storage Server</th>
+                        <td>{{ $client->storageServer->name }} ({{ $client->storageServer->region }})</td>
+                    </tr>
+                    <tr>
+                        <th>Server Address</th>
+                        <td>{{ $client->storageServer->server_address }}</td>
+                    </tr>
+                    <tr>
+                        <th>Quota (GB)</th>
+                        <td>{{ $client->quota_gb }}</td>
+                    </tr>
+                    <tr>
+                        <th>Access Protocols</th>
+                        <td>
+                            @php
+                                $protocols = [
+                                    'Reachable Externally' => $client->reachable_externally,
+                                    'SSH' => $client->ssh_enabled,
+                                    'Samba/SMB' => $client->samba_enabled,
+                                    'WebDAV' => $client->webdav_enabled,
+                                    'Read-Only' => $client->readonly,
+                                ];
+                            @endphp
+                            @foreach($protocols as $name => $enabled)
+                                @if($enabled)
+                                    <span class="badge badge-success">
+                                        <i class="fas fa-check"></i> {{ $name }}
+                                    </span>
+                                @else
+                                    <span class="badge badge-secondary">
+                                        <i class="fas fa-times"></i> {{ $name }}
+                                    </span>
+                                @endif
+                            @endforeach
+                        </td>
+                    </tr>
+                    @if($diskUtilization)
+                    <tr>
+                        <th>Disk Utilization</th>
+                        <td>
+                            <div class="progress" style="height: 25px;">
+                                <div class="progress-bar {{ $diskUtilization['percentage'] > 80 ? 'bg-danger' : ($diskUtilization['percentage'] > 60 ? 'bg-warning' : 'bg-success') }}"
+                                     role="progressbar"
+                                     style="width: {{ $diskUtilization['percentage'] }}%"
+                                     aria-valuenow="{{ $diskUtilization['percentage'] }}"
+                                     aria-valuemin="0"
+                                     aria-valuemax="100">
+                                    {{ $diskUtilization['used_gb'] }} GB / {{ $diskUtilization['quota_gb'] }} GB ({{ $diskUtilization['percentage'] }}%)
+                                </div>
                             </div>
-                        </div>
-                    </td>
-                </tr>
-                @else
-                <tr>
-                    <th>Disk Utilization</th>
-                    <td><span class="text-muted">Not available</span></td>
-                </tr>
-                @endif
-                <tr>
-                    <th>Registration Key</th>
-                    <td>
-                        <input type="text" value="{{ $client->registration_key }}" readonly class="form-control d-inline w-auto">
-                        <button class="btn btn-sm btn-outline-primary" onclick="copyToClipboard('{{ $client->registration_key }}')">Copy</button>
-                    </td>
-                </tr>
-                <tr>
-                    <th>Hetzner Username</th>
-                    <td>
-                        <input type="text" value="{{ $client->hetzner_username }}" readonly class="form-control d-inline w-auto">
-                        <button class="btn btn-sm btn-outline-primary" onclick="copyToClipboard('{{ $client->hetzner_username }}')">Copy</button>
-                    </td>
-                </tr>
-                <tr>
-                    <th>Hetzner Password</th>
-                    <td>
-                        <input type="text" value="{{ $client->hetzner_password }}" readonly class="form-control d-inline w-auto">
-                        <button class="btn btn-sm btn-outline-primary" onclick="copyToClipboard('{{ $client->hetzner_password }}')">Copy</button>
-                    </td>
-                </tr>
-            </table>
+                        </td>
+                    </tr>
+                    @else
+                    <tr>
+                        <th>Disk Utilization</th>
+                        <td><span class="text-muted">Not available</span></td>
+                    </tr>
+                    @endif
+                    <tr>
+                        <th>Registration Key</th>
+                        <td>
+                            <input type="text" value="{{ $client->registration_key }}" readonly class="form-control d-inline w-auto mb-1">
+                            <button class="btn btn-sm btn-outline-primary" onclick="copyToClipboard('{{ $client->registration_key }}')">Copy</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Hetzner Username</th>
+                        <td>
+                            <input type="text" value="{{ $client->hetzner_username }}" readonly class="form-control d-inline w-auto mb-1">
+                            <button class="btn btn-sm btn-outline-primary" onclick="copyToClipboard('{{ $client->hetzner_username }}')">Copy</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Hetzner Password</th>
+                        <td>
+                            <input type="text" value="{{ $client->hetzner_password }}" readonly class="form-control d-inline w-auto mb-1">
+                            <button class="btn btn-sm btn-outline-primary" onclick="copyToClipboard('{{ $client->hetzner_password }}')">Copy</button>
+                        </td>
+                    </tr>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -135,53 +137,55 @@
         </div>
         <div class="card-body">
             @if($client->agents->count() > 0)
-                <table class="table table-bordered table-striped">
-                    <thead>
-                        <tr>
-                            <th>Hostname</th>
-                            <th>Status</th>
-                            <th>Last Seen</th>
-                            <th>Last Backup</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($client->agents as $agent)
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped">
+                        <thead>
                             <tr>
-                                <td>{{ $agent->hostname }}</td>
-                                <td>
-                                    @if($agent->last_seen_at && $agent->last_seen_at->isAfter(now()->subMinutes(5)))
-                                        <span class="badge badge-success">Online</span>
-                                    @else
-                                        <span class="badge badge-danger">Offline</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    {{ $agent->last_seen_at ? $agent->last_seen_at->format('Y-m-d H:i:s') : 'Never' }}
-                                </td>
-                                <td>
-                                    @if($agent->last_backup_at)
-                                        {{ $agent->last_backup_at->format('Y-m-d H:i:s') }}
-                                    @else
-                                        <span class="text-muted">No backups yet</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    <form action="{{ route('admin.clients.agents.destroy', [$client->id, $agent->id]) }}"
-                                          method="POST"
-                                          class="d-inline"
-                                          onsubmit="return confirm('Are you sure you want to delete this agent? This action cannot be undone.');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-danger">
-                                            <i class="fas fa-trash"></i> Remove
-                                        </button>
-                                    </form>
-                                </td>
+                                <th>Hostname</th>
+                                <th>Status</th>
+                                <th>Last Seen</th>
+                                <th>Last Backup</th>
+                                <th>Actions</th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @foreach($client->agents as $agent)
+                                <tr>
+                                    <td>{{ $agent->hostname }}</td>
+                                    <td>
+                                        @if($agent->last_seen_at && $agent->last_seen_at->isAfter(now()->subMinutes(5)))
+                                            <span class="badge badge-success">Online</span>
+                                        @else
+                                            <span class="badge badge-danger">Offline</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        {{ $agent->last_seen_at ? $agent->last_seen_at->format('Y-m-d H:i:s') : 'Never' }}
+                                    </td>
+                                    <td>
+                                        @if($agent->last_backup_at)
+                                            {{ $agent->last_backup_at->format('Y-m-d H:i:s') }}
+                                        @else
+                                            <span class="text-muted">No backups yet</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <form action="{{ route('admin.clients.agents.destroy', [$client->id, $agent->id]) }}"
+                                              method="POST"
+                                              class="d-inline"
+                                              onsubmit="return confirm('Are you sure you want to delete this agent?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="fas fa-trash"></i> Remove
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             @else
                 <p class="text-muted">No agents registered yet.</p>
             @endif
@@ -194,36 +198,38 @@
         </div>
         <div class="card-body">
             @if($recentBackups->count() > 0)
-                <table class="table table-bordered table-striped">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Agent</th>
-                            <th>Status</th>
-                            <th>Size (GB)</th>
-                            <th>Message</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($recentBackups as $backup)
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped">
+                        <thead>
                             <tr>
-                                <td>{{ $backup->created_at->format('Y-m-d H:i:s') }}</td>
-                                <td>{{ $backup->agent->hostname ?? 'Unknown' }}</td>
-                                <td>
-                                    @if($backup->status === 'success')
-                                        <span class="badge badge-success">Success</span>
-                                    @else
-                                        <span class="badge badge-danger">Failed</span>
-                                    @endif
-                                </td>
-                                <td>{{ $backup->size_gb ?? '-' }}</td>
-                                <td>
-                                    <small class="text-muted">{{ \Illuminate\Support\Str::limit($backup->message ?? '-', 50) }}</small>
-                                </td>
+                                <th>Date</th>
+                                <th>Agent</th>
+                                <th>Status</th>
+                                <th>Size (GB)</th>
+                                <th>Message</th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @foreach($recentBackups as $backup)
+                                <tr>
+                                    <td>{{ $backup->created_at->format('Y-m-d H:i:s') }}</td>
+                                    <td>{{ $backup->agent->hostname ?? 'Unknown' }}</td>
+                                    <td>
+                                        @if($backup->status === 'success')
+                                            <span class="badge badge-success">Success</span>
+                                        @else
+                                            <span class="badge badge-danger">Failed</span>
+                                        @endif
+                                    </td>
+                                    <td>{{ $backup->size_gb ?? '-' }}</td>
+                                    <td>
+                                        <small class="text-muted">{{ \Illuminate\Support\Str::limit($backup->message ?? '-', 50) }}</small>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             @else
                 <p class="text-muted">No backup history available.</p>
             @endif

@@ -33,57 +33,60 @@
     <div class="card">
         <div class="card-body">
             <h5>Server Information</h5>
-            <table class="table table-bordered">
-                <tr>
-                    <th>Name</th>
-                    <td>{{ $storageServer->name }}</td>
-                </tr>
-                <tr>
-                    <th>Address</th>
-                    <td>{{ $storageServer->server_address ? $storageServer->server_address : 'N/A' }}</td>
-                <tr>
-                    <th>Region</th>
-                    <td>{{ $storageServer->region }}</td>
-                </tr>
-                <tr>
-                    <th>Status</th>
-                    <td>
-                        @if($storageServer->status === 'active')
-                            <span class="badge badge-success">Active</span>
-                        @else
-                            <span class="badge badge-danger">Inactive</span>
-                        @endif
-                    </td>
-                </tr>
-                <tr>
-                    <th>Hetzner ID</th>
-                    <td>{{ $storageServer->hetzner_id ?? 'N/A' }}</td>
-                </tr>
-                <tr>
-                    <th>Storage Utilization</th>
-                    <td>
-                        @php
-                            $percent = $storageServer->total_capacity_gb
-                                        ? round(($storageServer->used_capacity_gb / $storageServer->total_capacity_gb) * 100, 2)
-                                        : 0;
-                            $colorClass = $percent > 80 ? 'bg-danger' : ($percent > 60 ? 'bg-warning' : 'bg-success');
-                        @endphp
-                        <div class="progress" style="height: 25px;">
-                            <div class="progress-bar {{ $colorClass }}"
-                                 role="progressbar"
-                                 style="width: {{ $percent }}%"
-                                 aria-valuenow="{{ $percent }}"
-                                 aria-valuemin="0"
-                                 aria-valuemax="100">
-                                {{ $storageServer->used_capacity_gb }} GB / {{ $storageServer->total_capacity_gb }} GB ({{ $percent }}%)
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Name</th>
+                        <td>{{ $storageServer->name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Address</th>
+                        <td>{{ $storageServer->server_address ? $storageServer->server_address : 'N/A' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Region</th>
+                        <td>{{ $storageServer->region }}</td>
+                    </tr>
+                    <tr>
+                        <th>Status</th>
+                        <td>
+                            @if($storageServer->status === 'active')
+                                <span class="badge badge-success">Active</span>
+                            @else
+                                <span class="badge badge-danger">Inactive</span>
+                            @endif
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Hetzner ID</th>
+                        <td>{{ $storageServer->hetzner_id ?? 'N/A' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Storage Utilization</th>
+                        <td>
+                            @php
+                                $percent = $storageServer->total_capacity_gb
+                                            ? round(($storageServer->used_capacity_gb / $storageServer->total_capacity_gb) * 100, 2)
+                                            : 0;
+                                $colorClass = $percent > 80 ? 'bg-danger' : ($percent > 60 ? 'bg-warning' : 'bg-success');
+                            @endphp
+                            <div class="progress" style="height: 25px;">
+                                <div class="progress-bar {{ $colorClass }}"
+                                     role="progressbar"
+                                     style="width: {{ $percent }}%"
+                                     aria-valuenow="{{ $percent }}"
+                                     aria-valuemin="0"
+                                     aria-valuemax="100">
+                                    {{ $storageServer->used_capacity_gb }} GB / {{ $storageServer->total_capacity_gb }} GB ({{ $percent }}%)
+                                </div>
                             </div>
-                        </div>
-                        @if($percent > 80)
-                            <small class="text-danger"><i class="fas fa-exclamation-triangle"></i> Warning: Storage is above 80% capacity</small>
-                        @endif
-                    </td>
-                </tr>
-            </table>
+                            @if($percent > 80)
+                                <small class="text-danger"><i class="fas fa-exclamation-triangle"></i> Warning: Storage is above 80% capacity</small>
+                            @endif
+                        </td>
+                    </tr>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -93,53 +96,55 @@
         </div>
         <div class="card-body">
             @if($storageServer->clients->count() > 0)
-                <table class="table table-bordered table-striped">
-                    <thead>
-                        <tr>
-                            <th>Client Name</th>
-                            <th>Registration Key</th>
-                            <th>Agents</th>
-                            <th>Quota (GB)</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($storageServer->clients as $client)
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped">
+                        <thead>
                             <tr>
-                                <td>
-                                    <a href="{{ route('admin.clients.show', $client->id) }}">
-                                        {{ $client->name }}
-                                    </a>
-                                </td>
-                                <td>
-                                    <code>{{ $client->registration_key }}</code>
-                                </td>
-                                <td>{{ $client->agents_count ?? 0 }}</td>
-                                <td>{{ $client->quota_gb }} GB</td>
-                                <td>
-                                    @if($client->is_active)
-                                        <span class="badge badge-success">Active</span>
-                                    @else
-                                        <span class="badge badge-secondary">Inactive</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    <form action="{{ route('admin.storage_servers.subaccounts.destroy', [$storageServer->id, $client->id]) }}"
-                                          method="POST"
-                                          class="d-inline"
-                                          onsubmit="return confirm('Are you sure you want to delete this subaccount and client? This will also delete all associated agents and backups. This action cannot be undone.');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-danger">
-                                            <i class="fas fa-trash"></i> Remove
-                                        </button>
-                                    </form>
-                                </td>
+                                <th>Client Name</th>
+                                <th>Registration Key</th>
+                                <th>Agents</th>
+                                <th>Quota (GB)</th>
+                                <th>Status</th>
+                                <th>Actions</th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            @foreach($storageServer->clients as $client)
+                                <tr>
+                                    <td>
+                                        <a href="{{ route('admin.clients.show', $client->id) }}">
+                                            {{ $client->name }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <code>{{ $client->registration_key }}</code>
+                                    </td>
+                                    <td>{{ $client->agents_count ?? 0 }}</td>
+                                    <td>{{ $client->quota_gb }} GB</td>
+                                    <td>
+                                        @if($client->is_active)
+                                            <span class="badge badge-success">Active</span>
+                                        @else
+                                            <span class="badge badge-secondary">Inactive</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <form action="{{ route('admin.storage_servers.subaccounts.destroy', [$storageServer->id, $client->id]) }}"
+                                              method="POST"
+                                              class="d-inline"
+                                              onsubmit="return confirm('Are you sure you want to delete this subaccount and client? This will also delete all associated agents and backups. This action cannot be undone.');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-danger">
+                                                <i class="fas fa-trash"></i> Remove
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             @else
                 <p class="text-muted">No clients/subaccounts on this storage server.</p>
             @endif

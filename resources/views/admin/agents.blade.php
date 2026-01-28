@@ -2,12 +2,10 @@
 
 @section('title', 'Agents')
 
+@section('plugins.Datatables', true)
+
 @section('content_header')
 <h1>Agents</h1>
-@stop
-
-@section('css')
-<link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css">
 @stop
 
 @section('content')
@@ -34,14 +32,12 @@
 @stop
 
 @section('js')
-<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
-
 <script>
 $(function () {
     $('#agents-table').DataTable({
         processing: true,
         serverSide: true,
+        responsive: true,
         ajax: '/admin/api/agents',
         columns: [
             { data: 'id' },

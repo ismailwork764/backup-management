@@ -1,14 +1,14 @@
 @extends('adminlte::page')
 
-@section('title', 'Clients')
+@section('title', 'User Management')
 
 @section('plugins.Datatables', true)
 
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
-        <h1>Clients</h1>
-        <a href="{{ route('admin.clients.create') }}" class="btn btn-primary">
-            <i class="fas fa-plus"></i> Create Client
+        <h1>User Management</h1>
+        <a href="{{ route('register') }}" class="btn btn-primary">
+            <i class="fas fa-user-plus"></i> Create New User
         </a>
     </div>
 @stop
@@ -35,44 +35,43 @@
             </button>
         </div>
     @endif
-<div class="card">
-    <div class="card-header">
-        <h3 class="card-title">Client List</h3>
+
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">System Users</h3>
+        </div>
+        <div class="card-body">
+            <table id="users-table" class="table table-bordered table-striped" style="width: 100%">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Created At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
     </div>
-    <div class="card-body">
-        <table id="clients-table" class="table table-bordered table-striped" style="width: 100%">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Registration Key</th>
-                    <th>Storage Server</th>
-                    <th>Agents</th>
-                    <th>Last Backup</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </div>
-</div>
 @stop
 
 @section('js')
 <script>
 $(function () {
-    $('#clients-table').DataTable({
+    $('#users-table').DataTable({
         processing: true,
         serverSide: true,
         responsive: true,
-        ajax: '/admin/api/clients',
+        ajax: '{{ route('admin.api.users') }}',
         columns: [
             { data: 'id' },
             { data: 'name' },
-            { data: 'registration_key' },
-            { data: 'storage_server' },
-            { data: 'agents_count' },
-            { data: 'last_backup' },
+            { data: 'email' },
+            { data: 'created_at', render: function(data) {
+                return data ? new Date(data).toLocaleString() : '-';
+            }},
             { data: 'actions', orderable: false, searchable: false }
         ]
     });

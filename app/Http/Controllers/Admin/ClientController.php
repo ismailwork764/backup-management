@@ -46,10 +46,20 @@ class ClientController extends Controller
                 $showBtn = '<a href="'.route('admin.clients.show', $client->id).'" class="btn btn-sm btn-info mr-1">
                     <i class="fas fa-eye"></i> Show
                 </a>';
-                $agentsBtn = '<a href="/admin/clients/'.$client->id.'/agents" class="btn btn-sm btn-primary">
-                    <i class="fas fa-server"></i> View Agents
+                $agentsBtn = '<a href="'.route('admin.clients.agents.index', $client->id).'" class="btn btn-sm btn-primary">
+                    <i class="fas fa-server"></i> Agents
                 </a>';
-                return $showBtn . $agentsBtn;
+
+                $deleteBtn = '<form action="'.route('admin.clients.destroy', $client->id).'" method="POST" class="d-inline"
+                    onsubmit="return confirm(\'Are you sure you want to delete this client? This will also delete all associated agents and backups. This action cannot be undone.\');">
+                    <input type="hidden" name="_method" value="DELETE">
+                    <input type="hidden" name="_token" value="'.csrf_token().'">
+                    <button type="submit" class="btn btn-sm btn-danger ml-1">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </form>';
+
+                return $showBtn . $agentsBtn . $deleteBtn;
             })
             ->rawColumns(['actions'])
             ->make(true);
@@ -164,6 +174,27 @@ class ClientController extends Controller
             ->take(20);
 
         return view('admin.clients.show', compact('client', 'diskUtilization', 'recentBackups'));
+    }
+
+    public function destroy(Client $client)
+    {
+        try {
+            $hetznerService = app(\App\Services\HetznerStorageService::class);
+
+            if ($client->storageServer && $client->hetzner_subaccount_id) {
+                $hetznerService->deleteSubAccount(
+                    $client->storageServer->hetzner_id,
+                    $client->hetzner_subaccount_id
+                );
+            }
+
+            $client->delete();
+
+            return redirect()->route('admin.clients.index')
+                ->with('success', 'Client and associated subaccount deleted successfully');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Failed to delete client: ' . $e->getMessage()]);
+        }
     }
 
     public function destroyAgent(Client $client, Agent $agent)

@@ -7,9 +7,11 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\AgentController;
 use App\Http\Controllers\Admin\StorageServerController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\UserController;
+
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
 
 Route::get('/about', function () {
@@ -28,6 +30,7 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::post('clients', [ClientController::class, 'store'])->name('admin.clients.store');
     Route::get('clients/{client}', [ClientController::class, 'show'])->name('admin.clients.show');
     Route::get('clients/{client}/agents', [ClientController::class, 'agentsIndex'])->name('admin.clients.agents.index');
+    Route::delete('clients/{client}', [ClientController::class, 'destroy'])->name('admin.clients.destroy');
     Route::delete('clients/{client}/agents/{agent}', [ClientController::class, 'destroyAgent'])->name('admin.clients.agents.destroy');
 
     Route::get('api/clients', [ClientController::class, 'apiIndex']);
@@ -47,6 +50,10 @@ Route::prefix('admin')->middleware(['auth'])->group(function () {
     Route::get('api/reports', [ReportController::class, 'apiIndex']);
     Route::get('api/reports/storage-utilization', [ReportController::class, 'storageUtilization'])->name('admin.reports.storage-utilization');
     Route::get('api/reports/monthly-usage', [ReportController::class, 'monthlyUsage'])->name('admin.reports.monthly-usage');
+
+    Route::get('users', [UserController::class, 'index'])->name('admin.users.index');
+    Route::delete('users/{user}', [UserController::class, 'destroy'])->name('admin.users.destroy');
+    Route::get('api/users', [UserController::class, 'apiIndex'])->name('admin.api.users');
 });
 
 Route::middleware('auth')->group(function () {

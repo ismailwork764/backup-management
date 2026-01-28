@@ -2,12 +2,10 @@
 
 @section('title', 'Reports')
 
+@section('plugins.Datatables', true)
+
 @section('content_header')
 <h1>Reports</h1>
-@stop
-
-@section('css')
-<link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css">
 @stop
 
 @section('content')
@@ -100,14 +98,12 @@
 @stop
 
 @section('js')
-<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
-
 <script>
 $(function () {
     $('#storage-table').DataTable({
         processing: true,
         serverSide: true,
+        responsive: true,
         ajax: '/admin/api/reports/storage-utilization',
         columns: [
             { data: 'client_name' },
@@ -118,13 +114,13 @@ $(function () {
             { data: 'usage_bar', orderable: false, searchable: false },
             { data: 'actions', orderable: false, searchable: false }
         ],
-        order: [[2, 'desc']],
-        width: '100%'
+        order: [[2, 'desc']]
     });
 
     $('#monthly-table').DataTable({
         processing: true,
         serverSide: true,
+        responsive: true,
         ajax: '/admin/api/reports/monthly-usage',
         columns: [
             { data: 'client_name' },
@@ -132,13 +128,13 @@ $(function () {
             { data: 'max_used_gb' },
             { data: 'actions', orderable: false, searchable: false }
         ],
-        order: [[1, 'desc']],
-        width: '100%'
+        order: [[1, 'desc']]
     });
 
     $('#backups-table').DataTable({
         processing: true,
         serverSide: true,
+        responsive: true,
         ajax: '/admin/api/reports',
         columns: [
             { data: 'client_name' },
@@ -147,13 +143,13 @@ $(function () {
             { data: 'failed_count' },
             { data: 'total_gb' }
         ],
-        order: [[1, 'desc']],
-        width: '100%'
+        order: [[1, 'desc']]
     });
 
     $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
         $($.fn.dataTable.tables(true)).DataTable()
-            .columns.adjust();
+            .columns.adjust()
+            .responsive.recalc();
     });
 });
 </script>
