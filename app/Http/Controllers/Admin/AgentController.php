@@ -31,9 +31,12 @@ class AgentController extends Controller
             ->addColumn('last_seen', function($agent){
                 return $agent->last_seen_at ? $agent->last_seen_at->format('Y-m-d H:i') : '-';
             })
-            ->addColumn('actions', function($agent){
-                return '<a href="/admin/agents/'.$agent->id.'/backups" class="btn btn-sm btn-primary">View Backups</a>';
+            ->addColumn('actions', function ($agent) {
+                $url = route('admin.agents.backups', ['agent' => $agent->id]);
+
+                return '<a href="'.$url.'" class="btn btn-sm btn-primary">View Backups</a>';
             })
+
             ->rawColumns(['status', 'actions'])
             ->make(true);
     }
