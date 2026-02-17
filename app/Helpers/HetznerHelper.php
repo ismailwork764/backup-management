@@ -6,56 +6,42 @@ namespace App\Helpers;
 use League\Flysystem\Filesystem;
 use League\Flysystem\PhpseclibV3\SftpAdapter;
 use League\Flysystem\PhpseclibV3\SftpConnectionProvider;
-use League\Flysystem\FilesystemException;
-use Illuminate\Support\Facades\Log;
 use App\Models\StorageServer;
 
 class HetznerHelper
 {
+    /**
+     * Get total storage usage (in bytes) for a subaccount directory on a specific Hetzner Storage Box.
+     *
+     * @param StorageServer $server
+     * @param string $subAccountName Directory name for the subaccount
+     * @return int Total size in bytes
+     */
     public static function getSubAccountUsage(StorageServer $server, $subAccountName)
     {
-        try {
-            $connectionProvider = new SftpConnectionProvider(
-                $server->server_address,  
-                $server->username,         
-                $server->password,         
-                null,                      
-                null,                      
-                22,                        
-                false,                     
-                10,                        
-                10,                        
-                null,                      
-                null,                      
-                []                         
-            );
-            
-            $adapter = new SftpAdapter($connectionProvider, '/');
-          
-            $filesystem = new Filesystem($adapter);
-            
-            Log::info("Listing contents of directory: {$subAccountName}");
-            $files = $filesystem->listContents($subAccountName, true);
-            
-            $filesArray = iterator_to_array($files);
-            Log::info("Found " . count($filesArray) . " items in directory: {$subAccountName}");
-       
-            $totalSize = 0;
-            $fileCount = 0;
-            foreach ($filesArray as $file) {
-                if (($file['type'] ?? null) === 'file' && isset($file['fileSize'])) {
-                    $totalSize += $file['fileSize'];
-                    $fileCount++;
-                }
+        $connectionProvider = new SftpConnectionProvider(
+            $server->server_address, // host
+            $server->username,       // username
+            $server->password,       // password
+            null,                    // privateKey
+            22,                      // port
+            false,                   // useAgent (must be bool)
+            null,                    // passphrase
+            10,                      // timeout
+            10,                      // maxTries
+            null,                    // hostFingerprint
+            null,                    // connectivityChecker
+            null                     // proxy
+        );
+        $adapter = new SftpAdapter($connectionProvider, '/');
+        $filesystem = new Filesystem($adapter);
+        $files = $filesystem->listContents($subAccountName, true);
+        $totalSize = 0;
+        foreach ($files as $file) {
+            if (($file['type'] ?? null) === 'file' && isset($file['size'])) {
+                $totalSize += $file['size'];
             }
-           
-            return $totalSize;
-        } catch (FilesystemException $e) {
-            Log::error("Hetzner SFTP Usage Check Failed: " . $e->getMessage());
-            return null;
-        } catch (\Exception $e) {
-            Log::error("Hetzner SFTP Connection Error: " . $e->getMessage());
-            return null;
         }
+        return $totalSize;
     }
 }

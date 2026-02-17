@@ -10,6 +10,8 @@ class Client extends Model
 {
     protected $fillable = [
         'name',
+        'notification_email',
+        'daily_backup_notifications_enabled',
         'storage_server_id',
         'hetzner_subaccount_id',
         'registration_key',
@@ -27,6 +29,7 @@ class Client extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
+        'daily_backup_notifications_enabled' => 'boolean',
     ];
 
     public function backupLogs()

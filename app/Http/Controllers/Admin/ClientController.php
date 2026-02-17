@@ -79,6 +79,8 @@ class ClientController extends Controller
             'name' => 'required|string|max:255',
             'storage_server_id' => 'required|exists:storage_servers,id',
             'quota_gb' => 'required|integer|min:10',
+            'notification_email' => 'nullable|email|max:255|required_if:daily_backup_notifications_enabled,1',
+            'daily_backup_notifications_enabled' => 'nullable|boolean',
         ]);
 
         $storageServer = StorageServer::findOrFail($request->storage_server_id);
@@ -116,6 +118,8 @@ class ClientController extends Controller
 
             $client = Client::create([
                 'name' => $request->name,
+                'notification_email' => $request->input('notification_email'),
+                'daily_backup_notifications_enabled' => $request->boolean('daily_backup_notifications_enabled'),
                 'storage_server_id' => $storageServer->id,
                 'hetzner_subaccount_id' => $hetznerSubaccountId,
                 'registration_key' => $registrationKey,

@@ -48,6 +48,23 @@
                 </div>
 
                 <div class="form-group">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" name="daily_backup_notifications_enabled" class="custom-control-input" id="daily_backup_notifications_enabled" value="1">
+                        <label class="custom-control-label" for="daily_backup_notifications_enabled">
+                            <strong>Enable Daily Backup Summary Email (4:00 AM)</strong>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Notification Email</label>
+                    <input type="email" name="notification_email" class="form-control" placeholder="client@example.com">
+                    <small class="form-text text-muted">
+                        Required when daily backup summary email is enabled.
+                    </small>
+                </div>
+
+                <div class="form-group">
                     <label><strong>Access Protocols</strong></label>
                     <p style="font-size: 0.9em; color: #666; margin-bottom: 1rem;">Select which protocols should be enabled for this client's subaccount</p>
 

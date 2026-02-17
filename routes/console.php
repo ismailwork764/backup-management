@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Schedule;
 Schedule::command('alerts:no-backup')->daily();
 Schedule::command('alerts:storage-usage')->hourly();
 Schedule::command('alerts:send')->everyFiveMinutes();
+Schedule::command('clients:send-daily-backup-summary')->dailyAt('04:00');
 
 
 
